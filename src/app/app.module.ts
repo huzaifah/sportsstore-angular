@@ -9,7 +9,7 @@ import { CheckoutComponent } from './store/checkout.component';
 import { CartDetailComponent } from './store/cartDetail.component';
 import { RouterModule } from '@angular/router';
 import { StoreFirstGuard } from './storeFirst.guard';
-
+//import {} from "./admin/admin.module"
 @NgModule({
   declarations: [
     AppComponent
@@ -22,6 +22,7 @@ import { StoreFirstGuard } from './storeFirst.guard';
       { path: "store", component: StoreComponent, canActivate: [StoreFirstGuard] },
       { path: "cart", component: CartDetailComponent, canActivate: [StoreFirstGuard] },
       { path: "checkout", component: CheckoutComponent, canActivate: [StoreFirstGuard] },
+      { path: "admin", loadChildren: "./admin/admin.module#AdminModule", canActivate: [StoreFirstGuard] },
       { path: "**", redirectTo: "/store" }
     ])
   ],
