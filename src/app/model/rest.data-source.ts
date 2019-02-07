@@ -19,11 +19,6 @@ import { map } from 'rxjs/operators';
 
 const PROTOCOL = "http";
 const PORT = 3500;
-let httpOptions = {  
-    headers: new HttpHeaders({  
-        'Content-Type': 'application/json'  
-    })
-};
 
 @Injectable()
 export class RestDataSource {
@@ -45,38 +40,71 @@ export class RestDataSource {
             }));
     }
 
-    getProducts(): Observable<Product[]> {
-        return this.http.get<Product[]>(this.baseUrl + "products").pipe();
+    getProducts(): Observable<any> {
+        return this.sendRequest("get", this.baseUrl + "products");
     }
 
     saveOrder(order: Order): Observable<any> {
-        return this.http.post(this.baseUrl + "orders", JSON.stringify(order), httpOptions).pipe();
+        return this.sendRequest("post", this.baseUrl + "orders", order, true);
+    }
+
+    saveProduct(product: Product): Observable<any> {
+        return this.sendRequest("post", this.baseUrl + "products", product, true);
+    }
+
+    updateProduct(product: Product): Observable<any> {
+        return this.sendRequest("put", this.baseUrl + `products/${product.id}`, product, true);
+    }
+
+    deleteProduct(id: number): Observable<any> {
+        return this.sendRequest("delete", this.baseUrl + `products/${id}`, null, true);
+    }
+
+    getOrders(): Observable<any> {
+        return this.sendRequest("get", this.baseUrl + "orders");
+    }
+
+    deleteOrder(id: number): Observable<any> {
+        return this.sendRequest("delete", this.baseUrl + `orders/${id}`, null, true);
+    }
+
+    updateOrder(order: Order): Observable<any> {
+        return this.sendRequest("put", this.baseUrl + `orders/${order.id}`, order, true);
     }
 
     private sendRequest(verb: string,
         url: string,
         body?: Product | Order,
         auth: boolean = false) : Observable<Product | Product[] | Order | Order[]> {
-                
-            if (auth && this.auth_token != null) {
-                httpOptions.headers.append('authorization', `Bearer<${this.auth_token}`);
-            }
+
+            let httpHeaders = new HttpHeaders()
+                .set("Content-Type", "application/json")
+                .set("Authorization", `Bearer<${this.auth_token}`);
 
                 switch (verb) {
                     case "get":                     
-                        return this.http.get(
-                            url, httpOptions
+                        return this.http.get<Product | Product[] | Order | Order[]>(
+                            url, { headers: httpHeaders }
                             ).pipe();
 
                         break;
                 
                     case "post":                     
                         return this.http.post(
-                            url, JSON.stringify(body), httpOptions
+                            url, JSON.stringify(body), { headers: httpHeaders }
                             ).pipe();
 
                         break;
 
+                    case "put":
+                        return this.http.put(url, body, { headers: httpHeaders });
+
+                        break;
+
+                    case "delete":
+                        return this.http.delete(url, { headers: httpHeaders });
+
+                        break;
                     default:
                         break;
                 }
